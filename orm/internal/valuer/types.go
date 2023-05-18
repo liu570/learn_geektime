@@ -20,4 +20,5 @@ type Value interface {
 }
 
 // Creator 本质上也是Factory 模式 ， 只不过其十分简单
+// 需要传入两个参数 一个是对象，一个是该对象对应的元数据
 type Creator func(val any, meta *model.Model) Value

@@ -112,8 +112,20 @@ func (s *Selector[T]) Get(ctx context.Context) (*T, error) {
 }
 
 func (s *Selector[T]) GetMulti(ctx context.Context) ([]*T, error) {
-	//TODO implement me
-	panic("implement me")
+	model, err := s.r.Get(new(T))
+	if err != nil {
+		return nil, err
+	}
+	res := getMulti[T](ctx, s.core, s.sess, &QueryContext{
+		Type:      "SELECT",
+		Builder:   s,
+		Model:     model,
+		TableName: model.TableName,
+	})
+	if res.Result != nil {
+		return res.Result.([]*T), res.Err
+	}
+	return nil, res.Err
 }
 
 func (s *Selector[T]) Build() (*Query, error) {

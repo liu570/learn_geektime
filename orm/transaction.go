@@ -41,13 +41,13 @@ func (tx *Tx) execContext(ctx context.Context, query string, args ...any) (sql.R
 
 // Session 统一 Tx 与 DB 的接口
 type Session interface {
-	// 返回 Registry, valCreator
 	getCore() core
 	queryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 	execContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 }
 
 // core 统一 Tx 与 DB 都需要的数据
+// 同理几个 QueryBuilder 也都需要该数据
 type core struct {
 	r model.Registry
 	// valCreator 来确定我们是使用 反射 还是 unsafe

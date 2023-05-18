@@ -299,6 +299,66 @@ func TestSelector_Get(t *testing.T) {
 	}
 }
 
+func TestSelector_GetMulti(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name     string
+		query    string
+		mockErr  error
+		mockRows *sqlmock.Rows
+		wantErr  error
+		wantVal  []*TestModel
+	}{
+		{
+			name:    "single rows",
+			query:   "SELECT .*",
+			mockErr: nil,
+			mockRows: func() *sqlmock.Rows {
+				rows := sqlmock.NewRows([]string{"id", "first_name"})
+				rows.AddRow([]byte("123"), []byte("Ming"))
+				rows.AddRow([]byte("124"), []byte("Liu"))
+				return rows
+			}(),
+			wantErr: nil,
+			wantVal: func() []*TestModel {
+				res := make([]*TestModel, 0, 2)
+				res = append(res, &TestModel{
+					Id:        123,
+					FirstName: "Ming",
+				})
+				res = append(res, &TestModel{
+					Id:        124,
+					FirstName: "Liu",
+				})
+				return res
+			}(),
+		},
+	}
+
+	for _, tc := range testCases {
+		if tc.mockErr != nil {
+			mock.ExpectQuery(tc.query).WillReturnError(tc.mockErr)
+		} else {
+			mock.ExpectQuery(tc.query).WillReturnRows(tc.mockRows)
+		}
+	}
+	db, err := OpenDB(mockDB, DBUseReflectValuer())
+	require.NoError(t, err)
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := NewSelector[TestModel](db).GetMulti(context.Background())
+			assert.Equal(t, tt.wantErr, err)
+			if err != nil {
+				return
+			}
+			assert.Equal(t, tt.wantVal, res)
+		})
+	}
+}
+
 func TestSelector_Select(t *testing.T) {
 	db := memoryDB(t)
 
