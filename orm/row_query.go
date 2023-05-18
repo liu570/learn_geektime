@@ -2,7 +2,6 @@ package orm
 
 import (
 	"context"
-	"learn_geektime/orm/internal/errs"
 )
 
 // RawQuerier 原生查询器
@@ -15,8 +14,6 @@ type RawQuerier[T any] struct {
 
 	sql  string
 	args []any
-
-	typ string
 }
 
 func (r *RawQuerier[T]) Build() (*Query, error) {
@@ -43,7 +40,7 @@ func (r *RawQuerier[T]) Get(ctx context.Context) (*T, error) {
 		return nil, err
 	}
 	res := get[T](ctx, r.core, r.sess, &QueryContext{
-		Type:      r.typ,
+		Type:      "RAW",
 		Builder:   r,
 		Model:     model,
 		TableName: model.TableName,
@@ -60,7 +57,7 @@ func (r *RawQuerier[T]) GetMulti(ctx context.Context) ([]*T, error) {
 		return nil, err
 	}
 	res := getMulti[T](ctx, r.core, r.sess, &QueryContext{
-		Type:      r.typ,
+		Type:      "RAW",
 		Builder:   r,
 		Model:     model,
 		TableName: model.TableName,
@@ -71,81 +68,22 @@ func (r *RawQuerier[T]) GetMulti(ctx context.Context) ([]*T, error) {
 	return nil, res.Err
 }
 
-func getMulti[T any](ctx context.Context, c core, sess Session, qc *QueryContext) *QueryResult {
-	var root Handler = func(ctx context.Context, qc *QueryContext) *QueryResult {
-		q, err := qc.Builder.Build()
-		if err != nil {
-			return &QueryResult{
-				Result: nil,
-				Err:    err,
-			}
-		}
-		rows, err := sess.queryContext(ctx, q.SQL, q.Args...)
-		if err != nil {
-			return &QueryResult{
-				Result: nil,
-				Err:    err,
-			}
-		}
-		var ans []*T
-		for rows != nil {
-			t := new(T)
-			res := c.valCreator(t, qc.Model)
-			err = res.SetColumn(rows)
-			if err != nil {
-				if err == errs.ErrNoRows {
-					break
-				}
-				return &QueryResult{
-					Result: nil,
-					Err:    err,
-				}
-			}
-			ans = append(ans, t)
-		}
-
-		return &QueryResult{
-			Result: ans,
-			Err:    nil,
+func (r *RawQuerier[T]) Exec(ctx context.Context) Result {
+	model, err := r.r.Get(new(T))
+	if err != nil {
+		return Result{
+			err: err,
 		}
 	}
+	res := exec[T](ctx, r.core, r.sess, &QueryContext{
+		Type:      "RAW",
+		Builder:   r,
+		Model:     model,
+		TableName: model.TableName,
+	})
 
-	for i := len(c.ms) - 1; i >= 0; i-- {
-		root = c.ms[i](root)
+	if res.Err != nil {
+		return Result{err: res.Err}
 	}
-	res := root(ctx, qc)
-	return res
-}
-
-// get 该方法是 QueryBuilder 中的 Get方法的具体实现, 各个对象通过传入不同的参数来获得不同的实现
-func get[T any](ctx context.Context, c core, sess Session, qc *QueryContext) *QueryResult {
-	var root Handler = func(ctx context.Context, qc *QueryContext) *QueryResult {
-		q, err := qc.Builder.Build()
-		if err != nil {
-			return &QueryResult{
-				Result: nil,
-				Err:    err,
-			}
-		}
-		rows, err := sess.queryContext(ctx, q.SQL, q.Args...)
-		if err != nil {
-			return &QueryResult{
-				Result: nil,
-				Err:    err,
-			}
-		}
-		t := new(T)
-		res := c.valCreator(t, qc.Model)
-		err = res.SetColumn(rows)
-		return &QueryResult{
-			Result: t,
-			Err:    err,
-		}
-	}
-	for i := len(c.ms) - 1; i >= 0; i-- {
-		root = c.ms[i](root)
-	}
-
-	return root(ctx, qc)
-
+	return res.Result.(Result)
 }

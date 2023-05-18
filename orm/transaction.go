@@ -3,8 +3,6 @@ package orm
 import (
 	"context"
 	"database/sql"
-	"learn_geektime/orm/internal/valuer"
-	"learn_geektime/orm/model"
 )
 
 // Tx 对 sql.Tx 的封装
@@ -44,16 +42,4 @@ type Session interface {
 	getCore() core
 	queryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 	execContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-}
-
-// core 统一 Tx 与 DB 都需要的数据
-// 同理几个 QueryBuilder 也都需要该数据
-type core struct {
-	r model.Registry
-	// valCreator 来确定我们是使用 反射 还是 unsafe
-	valCreator valuer.Creator
-	// dialect 确定我们数据库使用哪个数据库的方言
-	dialect Dialect
-	// AOP 方案
-	ms []Middleware
 }
