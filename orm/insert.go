@@ -56,6 +56,7 @@ func (i *Inserter[T]) Values(vals ...*T) *Inserter[T] {
 	return i
 }
 
+// OnConflict 方言，在此实现不同数据库所特有的方言
 func (i *Inserter[T]) OnConflict() *OnConflictBuilder[T] {
 	return &OnConflictBuilder[T]{
 		i: i,

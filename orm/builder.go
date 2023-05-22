@@ -61,19 +61,9 @@ func (b *builder) buildSelectable(se Selectable) error {
 func (b *builder) buildOrderAble(order OrderAble) error {
 	switch expr := order.(type) {
 	case Column:
-		fd, ok := b.model.FieldMap[expr.name]
-		if !ok {
-			return errs.NewErrUnknownField(expr.name)
-		}
-		b.quote(fd.ColName)
+		return b.buildColumn(expr)
 	case OrderBy:
-		fd, ok := b.model.FieldMap[expr.col]
-		if !ok {
-			return errs.NewErrUnknownField(expr.col)
-		}
-		b.quote(fd.ColName)
-		b.sb.WriteByte(' ')
-		b.sb.WriteString(expr.order)
+		return b.buildOrderBy(expr)
 	}
 	return nil
 }
@@ -293,6 +283,17 @@ func (b *builder) buildAggregate(agg Aggregate) error {
 func (b *builder) buildRawExpr(raw RawExpr) error {
 	b.sb.WriteString(raw.raw)
 	b.args = append(b.args, raw.args...)
+	return nil
+}
+
+func (b *builder) buildOrderBy(order OrderBy) error {
+	fd, ok := b.model.FieldMap[order.col]
+	if !ok {
+		return errs.NewErrUnknownField(order.col)
+	}
+	b.quote(fd.ColName)
+	b.sb.WriteByte(' ')
+	b.sb.WriteString(order.order)
 	return nil
 }
 

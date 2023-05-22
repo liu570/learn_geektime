@@ -73,6 +73,7 @@ func (m *mysqlDialect) buildConflictKey(b *builder, odk *OnConflictKey) error {
 			b.sb.WriteByte(',')
 		}
 
+		// buildAssignable
 		switch expr := assign.(type) {
 		case Assignment:
 			err := b.buildAssignment(expr)
@@ -128,7 +129,7 @@ func (dialect *sqliteDialect) buildConflictKey(b *builder, odk *OnConflictKey) e
 		if idx > 0 {
 			b.sb.WriteByte(',')
 		}
-
+		// buildAssignable
 		switch expr := assign.(type) {
 		case Assignment:
 			err := b.buildAssignment(expr)
