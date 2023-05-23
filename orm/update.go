@@ -18,17 +18,25 @@ type Updater[T any] struct {
 }
 
 func (u *Updater[T]) Exec(ctx context.Context) Result {
-	q, err := u.Build()
+	// 这里调用 Get 方法获取元数据，是怕 Updater 中的元数据为空
+	model, err := u.r.Get(new(T))
 	if err != nil {
 		return Result{
 			err: err,
 		}
 	}
-	res, err := u.sess.execContext(ctx, q.SQL, q.Args...)
-	return Result{
-		res: res,
-		err: err,
+	qr := exec[T](ctx, u.sess.getCore(), u.sess, &QueryContext{
+		Type:      "UPDATE",
+		Builder:   u,
+		Model:     model,
+		TableName: model.TableName,
+	})
+	if qr.Err != nil {
+		return Result{
+			err: qr.Err,
+		}
 	}
+	return qr.Result.(Result)
 }
 
 func NewUpdater[T any](sess Session) *Updater[T] {

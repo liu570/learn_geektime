@@ -22,17 +22,25 @@ type Inserter[T any] struct {
 }
 
 func (i *Inserter[T]) Exec(ctx context.Context) Result {
-	q, err := i.Build()
+	// 这里调用 Get 方法获取元数据，是怕 Inserter 中的元数据为空
+	model, err := i.r.Get(new(T))
 	if err != nil {
 		return Result{
 			err: err,
 		}
 	}
-	res, err := i.sess.execContext(ctx, q.SQL, q.Args...)
-	return Result{
-		res: res,
-		err: err,
+	qr := exec[T](ctx, i.sess.getCore(), i.sess, &QueryContext{
+		Type:      "INSERT",
+		Builder:   i,
+		Model:     model,
+		TableName: model.TableName,
+	})
+	if qr.Err != nil {
+		return Result{
+			err: qr.Err,
+		}
 	}
+	return qr.Result.(Result)
 }
 
 // NewInserter 创建 insert 构建对象 , 输入参数可以为 DB，Tx
