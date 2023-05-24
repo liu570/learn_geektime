@@ -8,13 +8,23 @@ import (
 
 type Updater[T any] struct {
 	builder
-	core
 	sess   Session
 	values []*T
 	// 存储可以用在 SET 语句后面的结构体切片
 	assigns []Assignable
 	// 存储可以使用在 where 语句后面的结构体切片
 	where []Predicate
+}
+
+func NewUpdater[T any](sess Session) *Updater[T] {
+	c := sess.getCore()
+	return &Updater[T]{
+		sess: sess,
+		builder: builder{
+			dialect: c.dialect,
+			core:    c,
+		},
+	}
 }
 
 func (u *Updater[T]) Exec(ctx context.Context) Result {
@@ -37,17 +47,6 @@ func (u *Updater[T]) Exec(ctx context.Context) Result {
 		}
 	}
 	return qr.Result.(Result)
-}
-
-func NewUpdater[T any](sess Session) *Updater[T] {
-	c := sess.getCore()
-	return &Updater[T]{
-		sess: sess,
-		core: c,
-		builder: builder{
-			dialect: c.dialect,
-		},
-	}
 }
 
 func (u *Updater[T]) Update(vals ...*T) *Updater[T] {

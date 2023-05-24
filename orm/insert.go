@@ -9,8 +9,6 @@ import (
 type Inserter[T any] struct {
 	// 组合了多种语法需要使用的数据
 	builder
-	// 组合了 model.Register, valuer.Creator, dialect
-	core
 	// 确定 Inserter 使用的 DB
 	sess Session
 	// 表明要插入多少个数据 存储多个数据对应的结构体
@@ -19,6 +17,18 @@ type Inserter[T any] struct {
 	columns []string
 	// 表示支持复杂的语句 可以参考 dialect.learn_png 图示理解
 	onDuplicate *OnConflictKey
+}
+
+// NewInserter 创建 insert 构建对象 , 输入参数可以为 DB，Tx
+func NewInserter[T any](sess Session) *Inserter[T] {
+	c := sess.getCore()
+	return &Inserter[T]{
+		sess: sess,
+		builder: builder{
+			dialect: c.dialect,
+			core:    c,
+		},
+	}
 }
 
 func (i *Inserter[T]) Exec(ctx context.Context) Result {
@@ -41,16 +51,6 @@ func (i *Inserter[T]) Exec(ctx context.Context) Result {
 		}
 	}
 	return qr.Result.(Result)
-}
-
-// NewInserter 创建 insert 构建对象 , 输入参数可以为 DB，Tx
-func NewInserter[T any](sess Session) *Inserter[T] {
-	c := sess.getCore()
-	return &Inserter[T]{
-		sess:    sess,
-		core:    c,
-		builder: builder{dialect: c.dialect},
-	}
 }
 
 func (i *Inserter[T]) Columns(columns ...string) *Inserter[T] {
