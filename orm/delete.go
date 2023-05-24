@@ -6,7 +6,6 @@ type Deleter[T any] struct {
 	builder
 	// DELETE *
 	// or DELETE(*,*)
-	columns []Selectable
 	sess    Session
 	where   []Predicate
 	orderBy []OrderAble
@@ -26,13 +25,24 @@ func NewDeleter[T any](sess Session) *Deleter[T] {
 }
 
 func (d *Deleter[T]) Exec(ctx context.Context) Result {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (d *Deleter[T]) Delete(cols ...Selectable) *Deleter[T] {
-	d.columns = cols
-	return d
+	model, err := d.r.Get(new(T))
+	if err != nil {
+		return Result{
+			err: err,
+		}
+	}
+	qr := exec[T](ctx, d.sess.getCore(), d.sess, &QueryContext{
+		Type:      "INSERT",
+		Builder:   d,
+		Model:     model,
+		TableName: model.TableName,
+	})
+	if qr.Err != nil {
+		return Result{
+			err: qr.Err,
+		}
+	}
+	return qr.Result.(Result)
 }
 
 func (d *Deleter[T]) From(tbl TableReference) *Deleter[T] {
@@ -40,7 +50,7 @@ func (d *Deleter[T]) From(tbl TableReference) *Deleter[T] {
 	return d
 }
 
-func (d *Deleter[T]) Where(ps []Predicate) *Deleter[T] {
+func (d *Deleter[T]) Where(ps ...Predicate) *Deleter[T] {
 	d.where = ps
 	return d
 }
@@ -61,18 +71,7 @@ func (d *Deleter[T]) Build() (*Query, error) {
 	}
 	d.model = model
 	// DELETE
-	d.sb.WriteString("DELETE ")
-	if len(d.columns) > 0 {
-		for i, column := range d.columns {
-			if i > 0 {
-				d.sb.WriteByte(',')
-			}
-			err := d.buildSelectable(column)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
+	d.sb.WriteString("DELETE")
 
 	// FROM
 	d.sb.WriteString(" FROM ")

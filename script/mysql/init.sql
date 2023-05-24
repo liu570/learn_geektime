@@ -6,3 +6,21 @@ create table if not exists `integration_test`.`test_model`(
     `last_name` varchar(1024),
     primary key (`id`)
 );
+CREATE TABLE IF NOT EXISTS `integration_test`.`order`(
+    `id` bigint auto_increment,
+    `using_col1` varchar(1024) not null,
+    `using_col2` varchar(1024) not null,
+    primary key (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS `integration_test`.`order_detail`(
+    `order_id` bigint not null,
+    `item_id` bigint not null,
+    `using_col1` varchar(1024) not null,
+    `using_col2` varchar(1024) not null
+);
+
+CREATE TABLE IF NOT EXISTS `integration_test`.`item`(
+    `id` bigint auto_increment,
+    primary key (`id`)
+);
