@@ -63,8 +63,8 @@ type Field struct {
 	Offset uintptr
 
 	// 标记该字段在结构体中的顺序
-	Index         int
-	AutoIncrement bool
+	Index int
+	//AutoIncrement bool
 }
 
 // TableName 接口定义表名

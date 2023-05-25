@@ -39,11 +39,22 @@ func Test_parseModel(t *testing.T) {
 			input: &ColumnTag{},
 			want: &Model{
 				TableName: "column_tag",
+				Fields: []*Field{
+					{
+						GoName:  "ID",
+						ColName: "id3",
+						Type:    reflect.TypeOf(ColumnTag{}).Field(0).Type,
+						Offset:  reflect.TypeOf(ColumnTag{}).Field(0).Offset,
+						Index:   0,
+					},
+				},
 				FieldMap: map[string]*Field{
 					"ID": {
 						GoName:  "ID",
 						ColName: "id3",
 						Type:    reflect.TypeOf(ColumnTag{}).Field(0).Type,
+						Offset:  reflect.TypeOf(ColumnTag{}).Field(0).Offset,
+						Index:   0,
 					},
 				},
 				ColumnMap: map[string]*Field{
@@ -51,6 +62,8 @@ func Test_parseModel(t *testing.T) {
 						GoName:  "ID",
 						ColName: "id3",
 						Type:    reflect.TypeOf(ColumnTag{}).Field(0).Type,
+						Offset:  reflect.TypeOf(ColumnTag{}).Field(0).Offset,
+						Index:   0,
 					},
 				},
 			},
@@ -73,50 +86,98 @@ func Test_parseModel(t *testing.T) {
 }
 
 func getModelTest() *Model {
+	t := &TestModel{}
+	typ := reflect.TypeOf(t).Elem()
 	return &Model{
 		TableName: "test_model",
+		Fields: []*Field{
+			{
+				GoName:  "Id",
+				ColName: "id",
+				Type:    typ.Field(0).Type,
+				Offset:  typ.Field(0).Offset,
+				Index:   0,
+			},
+			{
+				GoName:  "FirstName",
+				ColName: "first_name",
+				Type:    typ.Field(1).Type,
+				Offset:  typ.Field(1).Offset,
+				Index:   1,
+			},
+			{
+				GoName:  "Age",
+				ColName: "age",
+				Type:    typ.Field(2).Type,
+				Offset:  typ.Field(2).Offset,
+				Index:   2,
+			},
+			{
+				GoName:  "LastName",
+				ColName: "last_name",
+				Type:    typ.Field(3).Type,
+				Offset:  typ.Field(3).Offset,
+				Index:   3,
+			},
+		},
 		FieldMap: map[string]*Field{
 			"Id": {
 				GoName:  "Id",
 				ColName: "id",
-				Type:    reflect.TypeOf(TestModel{}).Field(0).Type,
+				Type:    typ.Field(0).Type,
+				Offset:  typ.Field(0).Offset,
+				Index:   0,
 			},
 			"FirstName": {
 				GoName:  "FirstName",
 				ColName: "first_name",
-				Type:    reflect.TypeOf(TestModel{}).Field(1).Type,
+				Type:    typ.Field(1).Type,
+				Offset:  typ.Field(1).Offset,
+				Index:   1,
 			},
 			"Age": {
 				GoName:  "Age",
 				ColName: "age",
-				Type:    reflect.TypeOf(TestModel{}).Field(2).Type,
+				Type:    typ.Field(2).Type,
+				Offset:  typ.Field(2).Offset,
+				Index:   2,
 			},
 			"LastName": {
 				GoName:  "LastName",
 				ColName: "last_name",
-				Type:    reflect.TypeOf(TestModel{}).Field(3).Type,
+				Type:    typ.Field(3).Type,
+				Offset:  typ.Field(3).Offset,
+				Index:   3,
 			},
 		},
 		ColumnMap: map[string]*Field{
 			"id": {
 				GoName:  "Id",
 				ColName: "id",
-				Type:    reflect.TypeOf(TestModel{}).Field(0).Type,
+				Type:    typ.Field(0).Type,
+				Offset:  typ.Field(0).Offset,
+				Index:   0,
 			},
 			"first_name": {
 				GoName:  "FirstName",
 				ColName: "first_name",
-				Type:    reflect.TypeOf(TestModel{}).Field(1).Type,
+				Type:    typ.Field(1).Type,
+				Offset:  typ.Field(1).Offset,
+				Index:   1,
 			},
 			"age": {
 				GoName:  "Age",
 				ColName: "age",
-				Type:    reflect.TypeOf(TestModel{}).Field(2).Type,
+				Type:    typ.Field(2).Type,
+				Offset:  typ.Field(2).Offset,
+				Index:   2,
 			},
 			"last_name": {
 				GoName:  "LastName",
 				ColName: "last_name",
-				Type:    reflect.TypeOf(TestModel{}).Field(3).Type,
+				Type:    typ.Field(3).Type,
+				Offset:  typ.Field(3).Offset,
+				Index:   3,
 			},
 		},
 	}

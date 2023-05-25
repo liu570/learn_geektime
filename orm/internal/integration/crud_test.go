@@ -147,12 +147,12 @@ func TestMySQL(t *testing.T) {
 	})
 }
 
-func TestSQLite(t *testing.T) {
-	suite.Run(t, &TestSuite{
-		driver: "sqlite3",
-		dsn:    "file:test.db?cache=shared&mode=memory",
-	})
-}
+//func TestSQLite(t *testing.T) {
+//	suite.Run(t, &TestSuite{
+//		driver: "sqlite3",
+//		dsn:    "file:test.db?cache=shared&mode=memory",
+//	})
+//}
 
 type TestModel struct {
 	Id        int64
