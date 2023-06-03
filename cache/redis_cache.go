@@ -1,9 +1,5 @@
 package cache
 
-// mockgen -package=mocks -destination=mocks/redis_cmdable.mock.go github.com/redis/go-redis/v9 Cmdable
-// -package=mocks : 指定包名为 mocks
-// -destination=mocks/redis_cmdable.mock.go ： 指定文件位置是当前目录下的 mocks 下的 redis_cmdable.mock.go
-// github.com/redis/go-redis/v9 Cmdable : mock 的是 github.com/redis/go-redis/v9 库的 Cmdable 类
 import (
 	"context"
 	"errors"
@@ -13,6 +9,15 @@ import (
 
 type RedisCache struct {
 	client redis.Cmdable
+}
+
+func NewRedisCacheWithAddr(addr string) *RedisCache {
+	client := redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: "", // 没有设置密码
+		DB:       0,  // 使用默认的DB
+	})
+	return NewRedisCache(client)
 }
 
 func NewRedisCache(client redis.Cmdable) *RedisCache {

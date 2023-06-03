@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// 该类用来实现 read through 缓存模式
+//	ReadThroughCache 该类用来实现 read through 缓存模式
+//
 // read through 即是 读 DB 交由 cache 实现
-
 type ReadThroughCache struct {
 	Cache
 	Expiration time.Duration
@@ -24,16 +24,17 @@ func (c *ReadThroughCache) Get(ctx context.Context, key string) (any, error) {
 
 	// 未知错误
 	if err != nil && err != errs.NewErrKeyNotFound(key) {
-		return nil, errs.NewErrKeyNotFound(key)
+		return nil, err
 	}
 
 	// 缓存没有数据
-	if err == errs.NewErrKeyNotFound(key) {
+	if err != nil && err == errs.NewErrKeyNotFound(key) {
 		// 捞 db
 		val, err = c.LoadFunc(ctx, key)
 		if err != nil {
 			return nil, err
 		}
+
 		// 这里 err 可以考虑忽略掉，或者输出 warn 日志
 		err = c.Set(ctx, key, val, c.Expiration)
 		if err != nil {
@@ -45,5 +46,7 @@ func (c *ReadThroughCache) Get(ctx context.Context, key string) (any, error) {
 		}
 		return val, nil
 	}
+
+	// 缓存中有数据 直接返回
 	return val, nil
 }
