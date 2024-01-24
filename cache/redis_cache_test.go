@@ -26,7 +26,8 @@ func TestRedisCache_Set(t *testing.T) {
 		key        string
 		val        string
 		expiration time.Duration
-		wantErr    error
+
+		wantErr error
 	}{
 		{
 			name: "return ok",

@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// MaxCntCacheDecorator 对本地缓存的封装 使用装饰器模式增加功能
 type MaxCntCacheDecorator struct {
 	mutex  sync.Mutex
 	MaxCnt int32
@@ -30,6 +31,7 @@ func (c *MaxCntCacheDecorator) Set(ctx context.Context, key string, val any, exp
 	defer c.mutex.Unlock()
 	_, err := c.Cache.Get(ctx, key)
 	if err != nil && err != errs.NewErrKeyNotFound(key) {
+		// 这个错误如何处理
 		return err
 	}
 	if err == errs.NewErrKeyNotFound(key) {
