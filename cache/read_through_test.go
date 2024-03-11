@@ -79,6 +79,19 @@ func TestReadThroughCache_Get(t *testing.T) {
 	}
 	user, _ := userCacheV2.Get(context.Background(), "/user/123")
 	fmt.Print(user.Name)
+	userCacheV3 := &ReadThroughCacheV3{
+		// Loader接口 在此类设计中 用户可以实现 Loader接口 同时若用户不想实现也可以直接传入一个函数
+		Loader: LoadFunc(func(ctx context.Context, key string) (any, error) {
+			if strings.HasPrefix(key, "/user/") {
+				// 找用户的数据
+				// key = /user/123 ， 其中123 是用户 id
+				// 这是用户的
+				return orm.NewSelector[User](db).Get(ctx)
+			}
+			return nil, errors.New("不支持操作")
+		}),
+	}
+	fmt.Print(userCacheV3)
 }
 
 type User struct {

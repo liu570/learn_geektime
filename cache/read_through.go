@@ -47,6 +47,7 @@ func (c *ReadThroughCache) Get(ctx context.Context, key string) (any, error) {
 			//return nil, err
 		}
 
+		// 同步刷新缓存
 		// 这里 err 可以考虑忽略掉，或者输出 warn 日志
 		err = c.Set(ctx, key, val, c.Expiration)
 		if err != nil {
@@ -61,6 +62,14 @@ func (c *ReadThroughCache) Get(ctx context.Context, key string) (any, error) {
 
 	// 缓存中有数据 直接返回
 	return val, nil
+}
+
+func (c *ReadThroughCache) Set(ctx context.Context, key string, val any, expiration time.Duration) error {
+	// TODO: 注意这里加锁需要斟酌 加上锁还是有数据不一致的问题
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.Cache.Set(ctx, key, val, expiration)
+	//panic("implement me!")
 }
 
 type ReadThroughCacheV1[T any] struct {
@@ -110,4 +119,24 @@ type ReadThroughCacheV2[T any] struct {
 
 	// 我们把最常见的“捞DB”这种说法抽象为“加载数据”
 	LoadFunc func(ctx context.Context, key string) (T, error)
+}
+
+type ReadThroughCacheV3 struct {
+	mutex sync.RWMutex
+	Cache
+	Expiration time.Duration
+
+	// 我们把最常见的“捞DB”这种说法抽象为“加载数据”
+	//LoadFunc func(ctx context.Context, key string) (any, error)
+	Loader
+}
+
+type Loader interface {
+	Load(ctx context.Context, key string) (any, error)
+}
+
+type LoadFunc func(ctx context.Context, key string) (any, error)
+
+func (l LoadFunc) Load(ctx context.Context, key string) (any, error) {
+	return l(ctx, key)
 }
