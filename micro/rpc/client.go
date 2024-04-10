@@ -2,25 +2,21 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/silenceper/pool"
 	"learn_geektime/micro/rpc/message"
+	"learn_geektime/micro/rpc/serialize"
 	"net"
 	"reflect"
 	"time"
 )
 
-// InitClientProxy 为 GetById 之类的字段赋值
-func InitClientProxy(addr string, service Service) error {
-	client, err := NewClient(addr)
-	if err != nil {
-		return err
-	}
-	return setFuncField(service, client)
+// InitService 为 GetById 之类的字段赋值
+func (c *Client) InitService(service Service) error {
+	return setFuncField(service, c, c.serializer)
 }
 
-func setFuncField(service Service, p Proxy) error {
+func setFuncField(service Service, p Proxy, s serialize.Serializer) error {
 	if service == nil {
 		return errors.New("rpc:不支持nil")
 	}
@@ -51,7 +47,8 @@ func setFuncField(service Service, p Proxy) error {
 			retVal := reflect.New(fieldType.Type.Out(0).Elem())
 
 			ctx := args[0].Interface().(context.Context)
-			reqData, err := json.Marshal(args[1].Interface())
+			reqData, err := s.Encode(args[1].Interface())
+
 			if err != nil {
 				return []reflect.Value{retVal, reflect.ValueOf(err)}
 			}
@@ -60,6 +57,7 @@ func setFuncField(service Service, p Proxy) error {
 				ServiceName: service.Name(),
 				MethodName:  fieldType.Name,
 				Data:        reqData,
+				Serializer:  s.Code(),
 			}
 			// 发起远程调用
 			resp, err := p.Invoke(ctx, req)
@@ -75,7 +73,7 @@ func setFuncField(service Service, p Proxy) error {
 
 			// 这里怎么办
 			if len(resp.Data) > 0 {
-				err = json.Unmarshal(resp.Data, retVal.Interface())
+				err = s.Decode(resp.Data, retVal.Interface())
 				if err != nil {
 					// 反序列化的 error
 					return []reflect.Value{retVal, reflect.ValueOf(err)}
@@ -101,7 +99,8 @@ type Client struct {
 	network string
 	addr    string
 
-	pool pool.Pool
+	pool       pool.Pool
+	serializer serialize.Serializer
 }
 
 func NewClient(addr string) (*Client, error) {

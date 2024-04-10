@@ -85,7 +85,7 @@ func (s *Server) Invoke(ctx context.Context, req *message.Request) (*message.Res
 		MesssageID:  req.MesssageID,
 		Version:     req.Version,
 		Compression: req.Compression,
-		Serialize:   req.Serialize,
+		Serialize:   req.Serializer,
 	}
 
 	if !ok {

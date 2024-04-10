@@ -17,9 +17,10 @@ func TestInitClientProxy(t *testing.T) {
 		t.Log(err)
 	}()
 	time.Sleep(time.Second * 1)
-
-	UsClient := &UserService{}
-	err := InitClientProxy(":8081", UsClient)
+	UsService := &UserService{}
+	client, err := NewClient(":8081")
+	require.NoError(t, err)
+	err = client.InitService(UsService)
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -64,7 +65,7 @@ func TestInitClientProxy(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mock()
-			resp, err := UsClient.GetById(context.Background(), &GetByIdReq{Id: 123})
+			resp, err := UsService.GetById(context.Background(), &GetByIdReq{Id: 123})
 			require.Equal(t, tc.wantErr, err)
 			require.Equal(t, tc.wantResp, resp)
 

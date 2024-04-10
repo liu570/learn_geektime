@@ -20,7 +20,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 			},
 		},
 		{
@@ -29,7 +29,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 				ServiceName: "user-service",
 				MethodName:  "GetById",
 			},
@@ -40,7 +40,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 				ServiceName: "user-service",
 				MethodName:  "GetById",
 				Meta: map[string]string{
@@ -55,7 +55,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 
 				MethodName: "GetById",
 				Meta: map[string]string{
@@ -70,7 +70,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 				ServiceName: "user-service",
 				Meta: map[string]string{
 					"Id":   "123",
@@ -84,7 +84,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 				ServiceName: "user-service",
 				MethodName:  "GetById",
 				Meta: map[string]string{
@@ -100,7 +100,7 @@ func TestEncodeDecodeReq(t *testing.T) {
 				MesssageID:  3,
 				Version:     1,
 				Compression: 1,
-				Serialize:   3,
+				Serializer:  3,
 				ServiceName: "user-service",
 				MethodName:  "GetById",
 				Meta: map[string]string{
