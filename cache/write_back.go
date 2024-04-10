@@ -70,9 +70,9 @@ func (c *PreloadCache) Set(ctx context.Context, key string, val any, expiration 
 var group = &singleflight.Group{}
 
 func Biz(key string) {
-	val, err := cache.Get(context.Background(), key)
+	value, err := cache.Get(context.Background(), key)
 	if err == KeyNotFound {
-		val, err, _ = group.Do(key, func() (interface{}, error) {
+		value, err, _ = group.Do(key, func() (interface{}, error) {
 			newVal, err := QueryFromDB(key)
 			if err != nil {
 				return nil, err
@@ -81,6 +81,6 @@ func Biz(key string) {
 			return newVal, er
 		})
 	}
-	println(val)
+	println(value)
 }
 */

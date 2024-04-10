@@ -15,11 +15,11 @@ type LocalCache struct {
 	closeOnce sync.Once
 
 	// 回调方法
-	//onEvicted func(key string, val any) error
+	//onEvicted func(key string, value any) error
 	onEvicted func(key string, val any)
-	//onEvicted func(ctx context.Context, key string, val any) error
-	//onEvicted func(ctx context.Context, key string, val any)
-	//onEvicteds []func(key string, val any)
+	//onEvicted func(ctx context.Context, key string, value any) error
+	//onEvicted func(ctx context.Context, key string, value any)
+	//onEvicteds []func(key string, value any)
 }
 type KVOption func(key string, val any)
 

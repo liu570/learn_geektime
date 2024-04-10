@@ -5,12 +5,12 @@
 # 所以你可以考虑说将部分代码复制出去另外一个 docker-compose 文件
 
 services:
-#  redis:
-#    image: docker.io/bitnami/redis:7.0
-#    environment:
-#      - ALLOW_EMPTY_PASSWORD=yes
-#    ports:
-#      - '6379:6379'
+  redis:
+    image: docker.io/bitnami/redis:7.0
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
 ##    volumes:
 ##      - 'redis_data:/bitnami/redis/data'
 

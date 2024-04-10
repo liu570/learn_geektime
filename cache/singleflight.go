@@ -17,10 +17,10 @@ func NewSingleflightCache(cache Cache,
 				defer func() {
 					g.Forget(key)
 				}()
-				val, err, _ = g.Do(key, func() (interface{}, error) {
+				value, err, _ = g.Do(key, func() (interface{}, error) {
 					return loadFunc(ctx, key)
 				})
-				return val, err
+				return value, err
 			},
 		},
 	}

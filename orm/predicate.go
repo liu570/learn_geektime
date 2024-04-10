@@ -26,7 +26,7 @@ func (o op) String() string {
 //	return Predicate{
 //		Column: column,
 //		Op:     "=",
-//		Arg:    arg,
+//		Data:    arg,
 //	}
 //}
 

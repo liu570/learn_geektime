@@ -51,7 +51,7 @@ func (c *ReadThroughCache) Get(ctx context.Context, key string) (any, error) {
 		// 这里 err 可以考虑忽略掉，或者输出 warn 日志
 		err = c.Set(ctx, key, val, c.Expiration)
 		if err != nil {
-			// 这里要考虑刷新缓存失败，究竟要不要返回 val
+			// 这里要考虑刷新缓存失败，究竟要不要返回 value
 			//return nil, err
 
 			// 这里只输出错误日志
@@ -100,7 +100,7 @@ func (c *ReadThroughCacheV1[T]) Get(ctx context.Context, key string) (any, error
 		// 这里 err 可以考虑忽略掉，或者输出 warn 日志
 		err = c.Set(ctx, key, val, c.Expiration)
 		if err != nil {
-			// 这里要考虑刷新缓存失败，究竟要不要返回 val
+			// 这里要考虑刷新缓存失败，究竟要不要返回 value
 			//return nil, err
 
 			// 这里只输出错误日志
