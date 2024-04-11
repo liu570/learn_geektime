@@ -15,5 +15,9 @@ e2e:
 
 
 
-mockgen:
+mock_gen:
 	mockgen -destination=micro/rpc/mock_proxy_gen_test.go -package=rpc -source=micro/rpc/types.go Proxy
+
+mock_proto:
+	# 需要下载 proto 的编译器  apt install protobuf-compiler
+	protoc --go_out=. user.proto
