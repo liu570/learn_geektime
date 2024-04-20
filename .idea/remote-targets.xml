@@ -5,13 +5,13 @@
     <targets>
       <target name="WSL - UbuntuOnD" type="wsl" uuid="bcb85926-0352-44a7-b2c4-f55fc86c68f7">
         <config>
-          <option name="distributionMsId" value="UbuntuOnD" />
+          <option name="distributionMsId" value="Ubuntu" />
           <option name="projectRootOnTarget" value="/mnt/c/Program Files/JetBrains/GoLand 2022.3.2/jbr/bin&#10;/learn_geektime" />
         </config>
         <ContributedStateBase type="GoLanguageRuntime">
           <config>
             <option name="goPath" value="/home/liu/workspace/go" />
-            <option name="goRoot" value="/home/liu/go/bin/go" />
+            <option name="goRoot" value="/home/xy/go/bin/go" />
           </config>
         </ContributedStateBase>
       </target>
