@@ -20,4 +20,19 @@ mock_gen:
 
 mock_proto:
 	# 需要下载 proto 的编译器  apt install protobuf-compiler
+	#go install google.golang.org/protobuf/cmd/protoc-gen-go
+	#go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	protoc --go_out=. user.proto
+	# 生成 grpc 的代码，（与上面代码不能合成一行，不清楚原因）
+	protoc --go-grpc_out=. user.proto
+
+
+
+re_init_go_env:
+	cd $GOPATH
+	rm -rf pkg bin
+	mkdir pkg bin
+	go mod tidy
+	go mod download
+
+
