@@ -12,17 +12,15 @@ type ServerOption func(server *Server)
 
 type Server struct {
 	name            string
-	addr            string
 	listener        net.Listener
 	registry        registry.Registry
 	registerTimeout time.Duration
 	*grpc.Server
 }
 
-func NewServer(name string, addr string, opts ...ServerOption) (*Server, error) {
+func NewServer(name string, opts ...ServerOption) (*Server, error) {
 	server := &Server{
 		name:            name,
-		addr:            addr,
 		Server:          grpc.NewServer(),
 		registerTimeout: time.Second * 3,
 	}
@@ -32,8 +30,8 @@ func NewServer(name string, addr string, opts ...ServerOption) (*Server, error) 
 	return server, nil
 }
 
-func (s *Server) Start() error {
-	listener, err := net.Listen("tcp", s.addr)
+func (s *Server) Start(addr string) error {
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
@@ -45,7 +43,7 @@ func (s *Server) Start() error {
 		err := s.registry.Register(ctx, registry.ServiceInstance{
 			Name: s.name,
 			// 这里 ip 端口地址 如果是在容器中使用，容器的 ip 地址需要映射不可直接这样使用
-			Address: s.addr,
+			Address: listener.Addr().String(),
 		})
 		if err != nil {
 			return err

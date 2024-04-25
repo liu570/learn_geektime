@@ -36,3 +36,9 @@ re_init_go_env:
 	go mod download
 
 
+
+# 删除端口
+remove($PORT):
+	lsof -i :8081
+	kill -9 <PID>
+

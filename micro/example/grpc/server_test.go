@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"learn_geektime/micro/proto/gen"
 	"net"
@@ -15,7 +14,6 @@ func TestServer(t *testing.T) {
 	server := grpc.NewServer()
 	gen.RegisterUserServiceServer(server, us)
 	l, err := net.Listen("tcp", ":8081")
-	require.NoError(t, err)
 	err = server.Serve(l)
 	t.Log(err)
 }

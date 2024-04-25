@@ -19,11 +19,11 @@ func TestServer(t *testing.T) {
 	require.NoError(t, err)
 	r, err := etcd.NewRegistry(etcdClient)
 	require.NoError(t, err)
-	server, err := micro.NewServer("user-service", ":8081", micro.ServerWithRegistry(r))
+	server, err := micro.NewServer("user-service", micro.ServerWithRegistry(r))
 	require.NoError(t, err)
 
 	gen.RegisterUserServiceServer(server, us)
-	err = server.Start()
+	err = server.Start(":8083")
 	t.Log(err)
 }
 
