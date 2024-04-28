@@ -16,6 +16,8 @@ type Server struct {
 	registry        registry.Registry
 	registerTimeout time.Duration
 	*grpc.Server
+
+	weight int
 }
 
 func NewServer(name string, opts ...ServerOption) (*Server, error) {
@@ -44,6 +46,7 @@ func (s *Server) Start(addr string) error {
 			Name: s.name,
 			// 这里 ip 端口地址 如果是在容器中使用，容器的 ip 地址需要映射不可直接这样使用
 			Address: listener.Addr().String(),
+			Weight:  uint32(s.weight),
 		})
 		if err != nil {
 			return err
@@ -68,5 +71,22 @@ func (s *Server) Close() error {
 func ServerWithRegistry(r registry.Registry) ServerOption {
 	return func(server *Server) {
 		server.registry = r
+	}
+}
+
+func ServerWithRegisterTimeout(timeout time.Duration) ServerOption {
+	return func(server *Server) {
+		if server.registry == nil {
+			panic("micro: no registry for server")
+			return
+		}
+		server.registerTimeout = timeout
+	}
+}
+
+// ServerWithWeight 用于加权轮询中的权重配置，若不适用加权轮询算法则可以不配置
+func ServerWithWeight(weight int) ServerOption {
+	return func(server *Server) {
+		server.weight = weight
 	}
 }
