@@ -1,6 +1,15 @@
 package orm
 
+const (
+	fnAVG   = "AVG"
+	fnSUM   = "SUM"
+	fnMAX   = "MAX"
+	fnMIN   = "MIN"
+	fnCOUNT = "COUNT"
+)
+
 // Aggregate 实现聚合函数的结构体
+// eg. 常见的聚合函数有 AVG("age")、SUM("age")、MAX("age")、MIN("age")、COUNT("age")、
 type Aggregate struct {
 	arg string
 	fn  string
@@ -37,20 +46,34 @@ func (a Aggregate) GT(val any) Predicate {
 func Avg(col string) Aggregate {
 	return Aggregate{
 		arg: col,
-		fn:  "AVG",
+		fn:  fnAVG,
 	}
 }
 
 func Min(col string) Aggregate {
 	return Aggregate{
 		arg: col,
-		fn:  "MIN",
+		fn:  fnMIN,
 	}
 }
 
 func Max(col string) Aggregate {
 	return Aggregate{
 		arg: col,
-		fn:  "MAX",
+		fn:  fnMAX,
+	}
+}
+
+func Count(col string) Aggregate {
+	return Aggregate{
+		arg: col,
+		fn:  fnCOUNT,
+	}
+}
+
+func Sum(col string) Aggregate {
+	return Aggregate{
+		arg: col,
+		fn:  fnSUM,
 	}
 }

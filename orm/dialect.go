@@ -21,6 +21,7 @@ type OnConflictBuilder[T any] struct {
 	// 链式调用返回 INSERT 语句
 	i       *Inserter[T]
 	assigns []Assignable
+
 	// 复杂语句
 	//where []Predicate
 	conflictColumns []string

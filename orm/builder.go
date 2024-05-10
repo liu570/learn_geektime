@@ -46,10 +46,8 @@ func (b *builder) buildSelectable(se Selectable) error {
 	switch expr := se.(type) {
 	case Column:
 		return b.buildColumn(expr)
-
 	case Aggregate:
 		return b.buildAggregate(expr)
-
 	case RawExpr:
 		return b.buildRawExpr(expr)
 	default:
@@ -251,10 +249,11 @@ func (b *builder) buildPredicate(p Predicate) error {
 		b.sb.WriteByte(')')
 	}
 
-	b.sb.WriteByte(' ')
-	b.sb.WriteString(p.op.String())
-	b.sb.WriteByte(' ')
-
+	if p.op != "" {
+		b.sb.WriteByte(' ')
+		b.sb.WriteString(p.op.String())
+		b.sb.WriteByte(' ')
+	}
 	_, ok = p.right.(Predicate)
 	if ok {
 		b.sb.WriteByte('(')
@@ -268,7 +267,9 @@ func (b *builder) buildPredicate(p Predicate) error {
 	return nil
 }
 
+// buildAggregate 用于构建 SQL 语句中的聚合函数部分
 func (b *builder) buildAggregate(agg Aggregate) error {
+	// 使用元数据校验 该列是否是 结构体中有的列
 	fd, ok := b.model.FieldMap[agg.arg]
 	if !ok {
 		return errs.NewErrUnknownField(agg.arg)

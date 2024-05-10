@@ -12,6 +12,8 @@ type reflectValue struct {
 	meta *model.Model
 }
 
+var _ Creator = NewReflectValue
+
 func NewReflectValue(val any, meta *model.Model) Value {
 	return reflectValue{
 		val:  reflect.ValueOf(val).Elem(),

@@ -53,6 +53,9 @@ func (i *Inserter[T]) Exec(ctx context.Context) Result {
 	return qr.Result.(Result)
 }
 
+// Columns 指定要插入的列
+// TODO 目前只支持指定具体的列、但是不支持复杂的表达式
+// 实际上 插入的列 可以为 普通列、函数（eg mysql上的 now）、复合表达式
 func (i *Inserter[T]) Columns(columns ...string) *Inserter[T] {
 	i.columns = columns
 	return i

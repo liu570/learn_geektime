@@ -404,6 +404,23 @@ func TestSelector_Select(t *testing.T) {
 				SQL: "SELECT DISTINCT `first_name` FROM `test_model`;",
 			},
 		},
+
+		{
+			name: "raw as predicate",
+			s:    NewSelector[TestModel](db).Where(Raw("`id` < ?", 1).AsPredicate()),
+			want: &Query{
+				SQL:  "SELECT * FROM `test_model` WHERE `id` < ?;",
+				Args: []any{1},
+			},
+		},
+		{
+			name: "raw expression use in predicate",
+			s:    NewSelector[TestModel](db).Where(C("Id").EQ(Raw("`age` + ?", 1))),
+			want: &Query{
+				SQL:  "SELECT * FROM `test_model` WHERE `id` = `age` + ?;",
+				Args: []any{1},
+			},
+		},
 	}
 
 	for _, tt := range tests {

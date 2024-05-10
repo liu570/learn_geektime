@@ -6,7 +6,8 @@ type Expression interface {
 	expr()
 }
 
-// RawExpr 用于提供用户自定义 SQL 语句
+// RawExpr 代表原生表达式 用于提供用户自定义 SQL 语句
+// 注意：orm 框架不对原生表达式进行任何校验
 type RawExpr struct {
 	raw  string
 	args []any
@@ -24,6 +25,8 @@ func Raw(expr string, args ...any) RawExpr {
 }
 
 // s.Where(Raw("a = ? and b = ? and c = ? " , 1 ,2 ,3))
-func (RawExpr) RawAsPredicate() Predicate {
-	return Predicate{}
+func (r RawExpr) AsPredicate() Predicate {
+	return Predicate{
+		left: r,
+	}
 }

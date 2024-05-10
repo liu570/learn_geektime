@@ -30,90 +30,6 @@ func (o op) String() string {
 //	}
 //}
 
-// Column 用来描述 数据库查询语句中的列名
-type Column struct {
-	// 用来确定该列是哪个表的列名
-	table TableReference
-	name  string
-	alias string
-}
-
-func (c Column) OrderAble() {}
-
-// assign 标记实现 assignable 接口
-func (c Column) assign() {}
-
-// selectable 标记实现 Selectable 接口
-func (c Column) selectable() {}
-
-// expr 标记实现 Expression 接口
-func (c Column) expr() {}
-
-func C(name string) Column {
-	return Column{name: name}
-}
-
-// EQ  用法 C("id").EQ(12)
-func (c Column) EQ(val any) Predicate {
-	right, ok := val.(Expression)
-	if !ok {
-		right = NewValue(val)
-	}
-	return Predicate{
-		left:  c,
-		op:    opEQ,
-		right: right,
-	}
-}
-
-func (c Column) LT(val any) Predicate {
-	right, ok := val.(Expression)
-	if !ok {
-		right = NewValue(val)
-	}
-	return Predicate{
-		left:  c,
-		op:    opLT,
-		right: right,
-	}
-}
-
-func (c Column) GT(val any) Predicate {
-	right, ok := val.(Expression)
-	if !ok {
-		right = NewValue(val)
-	}
-	return Predicate{
-		left:  c,
-		op:    opGT,
-		right: right,
-	}
-}
-
-func (c Column) Add(val any) Predicate {
-	right, ok := val.(Expression)
-	if !ok {
-		right = NewValue(val)
-	}
-	return Predicate{
-		left:  c,
-		op:    opADD,
-		right: right,
-	}
-}
-
-func (c Column) Sub(val any) Predicate {
-	right, ok := val.(Expression)
-	if !ok {
-		right = NewValue(val)
-	}
-	return Predicate{
-		left:  c,
-		op:    opSUB,
-		right: right,
-	}
-}
-
 // Predicate 代表一个查询条件
 // Predicate 可以通过 Predicate 组合构成一个复杂的查询条件
 type Predicate struct {
@@ -166,4 +82,13 @@ func (v Value) expr() {}
 
 func NewValue(val any) Value {
 	return Value{val: val}
+}
+
+func valueOf(val any) Expression {
+	switch v := val.(type) {
+	case Expression:
+		return v
+	default:
+		return NewValue(val)
+	}
 }

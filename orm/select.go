@@ -31,6 +31,12 @@ type Selector[T any] struct {
 }
 
 // Selectable 标记适用于 SELECT 语句下的合法结构
+// 用于严格 检测适合用于 Selector 下的内容
+// -- Column 列可以
+// -- Aggregate
+// -- OrderBy
+//
+//	-- RawExpr
 type Selectable interface {
 	// 标记方法
 	selectable()

@@ -13,6 +13,11 @@ e2e:
 	docker compose down
 	service docker stop
 
+# 基准测试
+benchmark:
+	cd orm/internal/valuer
+	go test -bench=BenchmarkSetColumn -benchtime=100000x -benchmem
+
 
 
 mock_gen:

@@ -7,8 +7,10 @@ import (
 
 // 我们提供两种实现方法 一种 反射 ， 一种 unsafe 所以我们需要提供 接口选择使用哪种方法
 
-// 先来一种反射和 unsafe 的抽象
-
+// Value 结果集映射接口
+// 将 DB 查询的结果映射到 go 中对应的结构体中去
+// -- SetColumn 具体的映射方法
+// -- Field 用于获取该名字对应的字段具体数据
 type Value interface {
 	//Field(name string) (any, error)
 
@@ -19,6 +21,9 @@ type Value interface {
 	Field(name string) (any, error)
 }
 
-// Creator 本质上也是Factory 模式 ， 只不过其十分简单
+// Creator 用于创建 Value 接口对象 本框架 提供两个 Creator 的实现
+// -- NewReflectValue
+// -- NewUnsafeValue
+// 本质上也是 Factory 模式，只不过其十分简单
 // 需要传入两个参数 一个是对象，一个是该对象对应的元数据
 type Creator func(val any, meta *model.Model) Value

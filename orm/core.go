@@ -12,7 +12,7 @@ import (
 // 同理几个 QueryBuilder 也都需要该数据
 type core struct {
 	r model.Registry
-	// valCreator 来确定我们是使用 反射 还是 unsafe
+	// valCreator 接口 valuer.Value 的创建方法，提供该参数使得我们可以选择不同的实现方法 如 反射或unsafe
 	valCreator valuer.Creator
 	// dialect 确定我们数据库使用哪个数据库的方言
 	dialect Dialect

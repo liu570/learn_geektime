@@ -14,6 +14,9 @@ type unsafeValue struct {
 	addr unsafe.Pointer
 }
 
+// 签名 在 修改了 Creator 的时候这边对应的实现可以获得通知
+var _ Creator = NewUnsafeValue
+
 func NewUnsafeValue(val any, meta *model.Model) Value {
 	// val 此地传入的是指针 ， 所以我们直接获得他的地址
 	addr := unsafe.Pointer(reflect.ValueOf(val).Pointer())

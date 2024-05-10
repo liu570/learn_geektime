@@ -64,7 +64,7 @@ func TestInserter_Build_Unsafe(t *testing.T) {
 		{
 			// 指定列名字
 			name: "specify columns",
-			i: NewInserter[TestModel](db).Values(
+			i: NewInserter[TestModel](db).Columns("Id", "Age").Values(
 				&TestModel{
 					Id:        12,
 					FirstName: "Tom",
@@ -76,7 +76,7 @@ func TestInserter_Build_Unsafe(t *testing.T) {
 					Id:        13,
 					Age:       17,
 					LastName:  &sql.NullString{Valid: true, String: "Ming"},
-				}).Columns("Id", "Age"),
+				}),
 			want: &Query{
 				SQL: "INSERT INTO `test_model`(`id`,`age`) VALUES(?,?),(?,?);",
 				Args: []any{

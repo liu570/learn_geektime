@@ -32,7 +32,7 @@ func (d *Deleter[T]) Exec(ctx context.Context) Result {
 		}
 	}
 	qr := exec[T](ctx, d.sess.getCore(), d.sess, &QueryContext{
-		Type:      "INSERT",
+		Type:      "DELETE",
 		Builder:   d,
 		Model:     model,
 		TableName: model.TableName,
