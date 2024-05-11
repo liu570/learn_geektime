@@ -1,6 +1,6 @@
 package orm
 
-// Assignable 用来框定可以使用在 UPDATE 下的数据类型
+// Assignable 用来框定可以使用在 UPDATE 下的赋值数据类型
 type Assignable interface {
 	//assign 标记实现 assignable 接口
 	assign()

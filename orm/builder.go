@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// builder 用于封装一些轻量级的代码 用于简化代码
+// 同时持有一些 QueryBuilder 的公共字段 即是 Selector、Insertor、Updater、Delector 中共有的字段
 type builder struct {
 	// core 是用来整合 DB, Tx 所共需的数据
 	core
@@ -283,7 +285,7 @@ func (b *builder) buildAggregate(agg Aggregate) error {
 
 func (b *builder) buildRawExpr(raw RawExpr) error {
 	b.sb.WriteString(raw.raw)
-	b.args = append(b.args, raw.args...)
+	b.addArgs(raw.args...)
 	return nil
 }
 
@@ -308,4 +310,14 @@ func (b *builder) UnionPredicates(pds ...Predicate) Predicate {
 		pred = pred.And(p)
 	}
 	return pred
+}
+
+func (b *builder) addArgs(args ...any) {
+	if len(args) == 0 {
+		return
+	}
+	if b.args == nil {
+		b.args = make([]any, 0, 8)
+	}
+	b.args = append(b.args, args...)
 }

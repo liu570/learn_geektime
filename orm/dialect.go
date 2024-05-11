@@ -15,6 +15,16 @@ type Dialect interface {
 type standardSQL struct {
 }
 
+func (s standardSQL) quoter() byte {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s standardSQL) buildConflictKey(b *builder, odk *OnConflictKey) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 // ---------------------------------------------------------------------------------------- 分隔符 ---------------------------------------------------------------------------------------------------
 
 type OnConflictBuilder[T any] struct {
