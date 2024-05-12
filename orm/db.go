@@ -85,7 +85,7 @@ func OpenDB(db *sql.DB, opts ...DBOption) (*DB, error) {
 		core: core{
 			r:          model.NewRegistry(),
 			valCreator: valuer.NewUnsafeValue,
-			dialect:    &mysqlDialect{},
+			dialect:    DialectMySQL,
 		},
 		db: db,
 	}

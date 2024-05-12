@@ -106,7 +106,7 @@ func (d *Deleter[T]) Build() (*Query, error) {
 	// LIMIT
 	if d.limit > 0 {
 		d.sb.WriteString(" LIMIT ?")
-		d.args = append(d.args, d.limit)
+		d.addArgs(d.limit)
 	}
 
 	return &Query{

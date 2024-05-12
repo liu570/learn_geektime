@@ -16,7 +16,7 @@ type Inserter[T any] struct {
 	// 表明需要插入的列名
 	columns []string
 	// 表示支持复杂的语句 可以参考 dialect.learn_png 图示理解
-	onDuplicate *OnConflictKey
+	onDuplicate *Upsert
 }
 
 // NewInserter 创建 insert 构建对象 , 输入参数可以为 DB，Tx
@@ -68,8 +68,8 @@ func (i *Inserter[T]) Values(vals ...*T) *Inserter[T] {
 }
 
 // OnConflict 方言，在此实现不同数据库所特有的方言
-func (i *Inserter[T]) OnConflict() *OnConflictBuilder[T] {
-	return &OnConflictBuilder[T]{
+func (i *Inserter[T]) OnConflict() *UpsertBuilder[T] {
+	return &UpsertBuilder[T]{
 		i: i,
 	}
 }
@@ -135,14 +135,14 @@ func (i *Inserter[T]) Build() (*Query, error) {
 			if err != nil {
 				return nil, err
 			}
-			i.args = append(i.args, fdVal)
+			i.addArgs(fdVal)
 		}
 		i.sb.WriteByte(')')
 	}
 
 	// 构造 ON DUPLICATE KEY 部分
 	if i.onDuplicate != nil {
-		err = i.core.dialect.buildConflictKey(&i.builder, i.onDuplicate)
+		err = i.core.dialect.buildUpsert(&i.builder, i.onDuplicate)
 		if err != nil {
 			return nil, err
 		}

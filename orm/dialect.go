@@ -4,11 +4,17 @@ import (
 	"learn_geektime/orm/internal/errs"
 )
 
+var (
+	DialectMySQL   Dialect = &mysqlDialect{}
+	DialectSqlite  Dialect = &sqliteDialect{}
+	Dialectpostgre Dialect = &postgreDialect{}
+)
+
 // Dialect 方言，构造不同数据库个性部分
 type Dialect interface {
 	// 引号
 	quoter() byte
-	buildConflictKey(b *builder, odk *OnConflictKey) error
+	buildUpsert(b *builder, upsert *Upsert) error
 }
 
 // standardSQL SQL标准的方言实现
@@ -20,14 +26,14 @@ func (s standardSQL) quoter() byte {
 	panic("implement me")
 }
 
-func (s standardSQL) buildConflictKey(b *builder, odk *OnConflictKey) error {
+func (s standardSQL) buildUpsert(b *builder, upsert *Upsert) error {
 	//TODO implement me
 	panic("implement me")
 }
 
 // ---------------------------------------------------------------------------------------- 分隔符 ---------------------------------------------------------------------------------------------------
 
-type OnConflictBuilder[T any] struct {
+type UpsertBuilder[T any] struct {
 	// 链式调用返回 INSERT 语句
 	i       *Inserter[T]
 	assigns []Assignable
@@ -36,13 +42,13 @@ type OnConflictBuilder[T any] struct {
 	//where []Predicate
 	conflictColumns []string
 }
-type OnConflictKey struct {
+type Upsert struct {
 	assigns         []Assignable
 	conflictColumns []string
 	//doNothing bool
 }
 
-func (o *OnConflictBuilder[T]) ConflictColumns(cols ...string) *OnConflictBuilder[T] {
+func (o *UpsertBuilder[T]) ConflictColumns(cols ...string) *UpsertBuilder[T] {
 	o.conflictColumns = cols
 	return o
 }
@@ -51,8 +57,8 @@ func (o *OnConflictBuilder[T]) ConflictColumns(cols ...string) *OnConflictBuilde
 //		o.where = ps
 //		return o
 //	}
-func (o *OnConflictBuilder[T]) Update(assigns ...Assignable) *Inserter[T] {
-	o.i.onDuplicate = &OnConflictKey{
+func (o *UpsertBuilder[T]) Update(assigns ...Assignable) *Inserter[T] {
+	o.i.onDuplicate = &Upsert{
 		conflictColumns: o.conflictColumns,
 		assigns:         assigns,
 	}
@@ -77,9 +83,9 @@ func (m *mysqlDialect) quoter() byte {
 	return '`'
 }
 
-func (m *mysqlDialect) buildConflictKey(b *builder, odk *OnConflictKey) error {
+func (m *mysqlDialect) buildUpsert(b *builder, upsert *Upsert) error {
 	b.sb.WriteString(" ON DUPLICATE KEY UPDATE ")
-	for idx, assign := range odk.assigns {
+	for idx, assign := range upsert.assigns {
 		if idx > 0 {
 			b.sb.WriteByte(',')
 		}
@@ -118,16 +124,16 @@ func (dialect *sqliteDialect) quoter() byte {
 	return '`'
 }
 
-func (dialect *sqliteDialect) buildConflictKey(b *builder, odk *OnConflictKey) error {
+func (dialect *sqliteDialect) buildUpsert(b *builder, upsert *Upsert) error {
 
-	b.sb.WriteString("ON CONFLICT")
-	if len(odk.conflictColumns) > 0 {
+	b.sb.WriteString(" ON CONFLICT")
+	if len(upsert.conflictColumns) > 0 {
 		b.sb.WriteByte('(')
-		for i, column := range odk.conflictColumns {
+		for i, column := range upsert.conflictColumns {
 			if i > 0 {
 				b.sb.WriteByte(',')
 			}
-			fd, ok := b.model.ColumnMap[column]
+			fd, ok := b.model.FieldMap[column]
 			if !ok {
 				return errs.NewErrUnknownField(column)
 			}
@@ -135,8 +141,8 @@ func (dialect *sqliteDialect) buildConflictKey(b *builder, odk *OnConflictKey) e
 		}
 		b.sb.WriteByte(')')
 	}
-	b.sb.WriteString(" DO UPDATE SET")
-	for idx, assign := range odk.assigns {
+	b.sb.WriteString(" DO UPDATE SET ")
+	for idx, assign := range upsert.assigns {
 		if idx > 0 {
 			b.sb.WriteByte(',')
 		}
@@ -160,4 +166,8 @@ func (dialect *sqliteDialect) buildConflictKey(b *builder, odk *OnConflictKey) e
 		}
 	}
 	return nil
+}
+
+type postgreDialect struct {
+	standardSQL
 }

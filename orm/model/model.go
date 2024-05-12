@@ -22,7 +22,7 @@ type Model struct {
 	ColumnMap map[string]*Field
 }
 
-func ModelWithTableName(name string) ModelOpt {
+func WithTableName(name string) ModelOpt {
 	return func(m *Model) error {
 		if name == "" {
 			return errs.ErrEmptyTableName
@@ -32,7 +32,7 @@ func ModelWithTableName(name string) ModelOpt {
 	}
 }
 
-func ModelWithColumnName(field string, colName string) ModelOpt {
+func WithColumnName(field string, colName string) ModelOpt {
 	return func(m *Model) error {
 		fd, ok := m.FieldMap[field]
 		if !ok {
@@ -43,7 +43,7 @@ func ModelWithColumnName(field string, colName string) ModelOpt {
 	}
 }
 
-func ModelWithColumn(field string, col *Field) ModelOpt {
+func WithColumn(field string, col *Field) ModelOpt {
 	return func(m *Model) error {
 		m.FieldMap[field] = col
 		return nil

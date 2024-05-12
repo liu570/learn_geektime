@@ -216,13 +216,13 @@ func (s *Selector[T]) Build() (*Query, error) {
 	// LIMIT
 	if s.limit > 0 {
 		s.sb.WriteString(" LIMIT ?")
-		s.args = append(s.args, s.limit)
+		s.addArgs(s.limit)
 	}
 
 	// OFFSET
 	if s.offset > 0 {
 		s.sb.WriteString(" OFFSET ?")
-		s.args = append(s.args, s.offset)
+		s.addArgs(s.offset)
 	}
 
 	s.sb.WriteByte(';')

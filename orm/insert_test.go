@@ -7,6 +7,77 @@ import (
 	"testing"
 )
 
+func TestInserter_SQLite_upset(t *testing.T) {
+	db := memoryDB(t, DBWithDialect(DialectSqlite))
+	testCases := []struct {
+		name    string
+		i       QueryBuilder
+		want    *Query
+		wantErr error
+	}{
+		{
+			name: "upset",
+			i: NewInserter[TestModel](db).Values(&TestModel{
+				Id:        12,
+				FirstName: "Tom",
+				Age:       18,
+				LastName:  &sql.NullString{Valid: true, String: "Jerry"},
+			}).OnConflict().ConflictColumns("FirstName").Update(Assign("Age", 19), Assign("FirstName", "Deng")),
+			want: &Query{
+				SQL: "INSERT INTO `test_model`(`id`,`first_name`,`age`,`last_name`) VALUES(?,?,?,?)" +
+					" ON CONFLICT(`first_name`) DO UPDATE SET `age` = ?,`first_name` = ?;",
+				Args: []any{
+					int64(12), "Tom", int8(18), &sql.NullString{Valid: true, String: "Jerry"}, 19, "Deng",
+				},
+			},
+		},
+
+		{
+			name: "upset use columns",
+			i: NewInserter[TestModel](db).Values(&TestModel{
+				Id:        12,
+				FirstName: "Tom",
+				Age:       18,
+				LastName:  &sql.NullString{Valid: true, String: "Jerry"},
+			}).OnConflict().ConflictColumns("FirstName", "LastName").Update(C("Age")),
+			want: &Query{
+				SQL: "INSERT INTO `test_model`(`id`,`first_name`,`age`,`last_name`) VALUES(?,?,?,?)" +
+					" ON CONFLICT(`first_name`,`last_name`) DO UPDATE SET `age` = excluded.`age`;",
+				Args: []any{
+					int64(12), "Tom", int8(18), &sql.NullString{Valid: true, String: "Jerry"},
+				},
+			},
+		},
+		{
+			name: "upset multiple",
+			i: NewInserter[TestModel](db).Values(&TestModel{
+				Id:        12,
+				FirstName: "Tom",
+				Age:       18,
+				LastName:  &sql.NullString{Valid: true, String: "Jerry"},
+			}).OnConflict().ConflictColumns("FirstName", "LastName").Update(Assign("Age", 19), C("FirstName")),
+			want: &Query{
+				SQL: "INSERT INTO `test_model`(`id`,`first_name`,`age`,`last_name`) VALUES(?,?,?,?)" +
+					" ON CONFLICT(`first_name`,`last_name`) DO UPDATE SET `age` = ?,`first_name` = excluded.`first_name`;",
+				Args: []any{
+					int64(12), "Tom", int8(18), &sql.NullString{Valid: true, String: "Jerry"}, 19,
+				},
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.i.Build()
+			assert.Equal(t, tt.wantErr, err)
+			if err != nil {
+				return
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestInserter_Build_Unsafe(t *testing.T) {
 	db := memoryDB(t)
 	testCases := []struct {

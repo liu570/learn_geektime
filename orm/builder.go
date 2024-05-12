@@ -163,17 +163,17 @@ func (b *builder) buildAssignment(assignment Assignment) error {
 		return b.buildExpression(expr)
 	case RawExpr:
 		b.sb.WriteString(expr.raw)
-		b.args = append(b.args, expr.args...)
+		b.addArgs(expr.args...)
 	case Value:
 		b.sb.WriteByte('?')
 		if b.args == nil {
 			b.args = make([]any, 0, 8)
 		}
-		b.args = append(b.args, expr.val)
+		b.addArgs(expr.val)
 
 		//default:
 		//b.sb.WriteByte('?')
-		//b.args = append(b.args, expr.val)
+		//b.addArgs(expr.val)
 	}
 	return nil
 }
@@ -234,7 +234,7 @@ func (b *builder) buildValue(value Value) error {
 	if b.args == nil {
 		b.args = make([]any, 0, 8)
 	}
-	b.args = append(b.args, value.val)
+	b.addArgs(value.val)
 
 	return nil
 }
