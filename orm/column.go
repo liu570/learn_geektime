@@ -23,6 +23,17 @@ func C(name string) Column {
 	return Column{name: name}
 }
 
+// AS （列名的别名功能）这里新建一个对象 相当于将 Column 设置为一个不可变对象 可以避免并发问题
+// 同时这里不使用指针也可以减少内存逃逸现象
+func (c Column) AS(alias string) Column {
+	return Column{
+		name:  c.name,
+		table: c.table,
+		alias: alias,
+	}
+
+}
+
 // EQ  用法 C("id").EQ(12)
 func (c Column) EQ(val any) Predicate {
 	return Predicate{

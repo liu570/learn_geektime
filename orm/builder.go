@@ -9,12 +9,16 @@ import (
 
 // builder 用于封装一些轻量级的代码 用于简化代码
 // 同时持有一些 QueryBuilder 的公共字段 即是 Selector、Insertor、Updater、Delector 中共有的字段
+// 创建背景 由于 upsert 语句不同的数据库构建方式不同，所以我们引入 Dialect 接口
+// upsertBuilder 结构用于具体的 Dialect 实现结构体, 同时实现 Dialect方法的时候我们需要 元数据、stringBuilder等多种数据
+// 于是我们引入 builder 结构体使得 builder 结构体拥有 QueryBuilder 的公共字段
 type builder struct {
 	// core 是用来整合 DB, Tx 所共需的数据
 	core
-	sb      strings.Builder
+	sb   strings.Builder
+	args []any
+
 	model   *model.Model
-	args    []any
 	dialect Dialect
 	// 确定所对应的表名 如果为空则表明为对应的结构体名字
 	table TableReference

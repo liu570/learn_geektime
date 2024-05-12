@@ -11,13 +11,24 @@ const (
 // Aggregate 实现聚合函数的结构体
 // eg. 常见的聚合函数有 AVG("age")、SUM("age")、MAX("age")、MIN("age")、COUNT("age")、
 type Aggregate struct {
-	arg string
-	fn  string
+	arg   string
+	fn    string
+	alias string
 }
 
 func (a Aggregate) selectable() {}
 
 func (a Aggregate) expr() {}
+
+// AS （列名的别名功能）这里新建一个对象 相当于将 Aggregate 设置为一个不可变对象 可以避免并发问题
+// 同时这里不使用指针也可以减少内存逃逸现象
+func (a Aggregate) AS(alias string) Aggregate {
+	return Aggregate{
+		arg:   a.arg,
+		fn:    a.fn,
+		alias: alias,
+	}
+}
 
 func (a Aggregate) EQ(val any) Predicate {
 	return Predicate{

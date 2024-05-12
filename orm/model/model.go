@@ -32,11 +32,11 @@ func WithTableName(name string) ModelOpt {
 	}
 }
 
-func WithColumnName(field string, colName string) ModelOpt {
+func WithColumnName(fieldName string, colName string) ModelOpt {
 	return func(m *Model) error {
-		fd, ok := m.FieldMap[field]
+		fd, ok := m.FieldMap[fieldName]
 		if !ok {
-			return errs.NewErrUnknownField(field)
+			return errs.NewErrUnknownField(fieldName)
 		}
 		fd.ColName = colName
 		return nil

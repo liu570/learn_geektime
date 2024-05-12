@@ -17,7 +17,9 @@ type Value interface {
 	// SetColumn 将数据库查询到的结果映射到结构体中
 	SetColumn(rows *sql.Rows) error
 
-	// Field 用于获取该名字对应的字段
+	// Field 用于该字段名对应的字段值
+	// 诞生背景，插入语句的时候我们需要根据给出的数据 将数据 加入 builder 中的 args 数据中去，因此引入该方法抽象
+	// 目前有反射与unsafe两种实现
 	Field(name string) (any, error)
 }
 
