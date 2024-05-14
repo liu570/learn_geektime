@@ -8,12 +8,10 @@ import (
 type Selector[T any] struct {
 	// 组合了多种语法需要使用的相同的数据
 	builder
+	sess Session
 
 	// 存储可以使用在 where 语句后面的结构体切片
 	where []Predicate
-
-	sess Session
-
 	// 存储可以使用在 SELECT 语句后面的结构体切片
 	columns []Selectable
 	// 存储可以使用在 HAVING 语句后面的结构体切片 该数据与 WHERE 语法需要的数据几乎一样

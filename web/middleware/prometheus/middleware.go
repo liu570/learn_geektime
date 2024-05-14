@@ -20,7 +20,7 @@ func (m *MiddlewareBuilder) Build() web.Middleware {
 		Subsystem:   m.Subsystem,
 		ConstLabels: m.ConstLabels,
 		Help:        m.Help,
-	}, []string{"pattern", "method", "'status"})
+	}, []string{"pattern", "method", "status"})
 	//必须使用否则 prometheus 无用
 	prometheus.MustRegister(summaryVec)
 	return func(next web.HandleFunc) web.HandleFunc {

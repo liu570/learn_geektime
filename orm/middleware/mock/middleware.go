@@ -6,9 +6,17 @@ import (
 	"time"
 )
 
-// 在数据库查询中我们通常使用sqlmock 来模拟sql返回语句 ， 但其实我们也可以通过手写middleware来模拟mock
+// 在数据库查询中我们通常使用 sqlmock 来模拟 sql 返回语句 ， 但其实我们也可以通过手写middleware来模拟mock
 
 type MiddlewareBuilder struct {
+}
+
+type Mock struct {
+	Sleep  time.Duration
+	Result *orm.QueryResult
+}
+
+type mockKey struct {
 }
 
 func (m MiddlewareBuilder) Build() orm.Middleware {
@@ -28,12 +36,4 @@ func (m MiddlewareBuilder) Build() orm.Middleware {
 			return next(ctx, qc)
 		}
 	}
-}
-
-type Mock struct {
-	Sleep  time.Duration
-	Result *orm.QueryResult
-}
-
-type mockKey struct {
 }

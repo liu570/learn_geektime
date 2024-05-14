@@ -21,7 +21,7 @@ type QueryResult struct {
 	// SELECT 语句，你的返回值是 T 或是 []T
 	// UPDATE,SELECT,DELETE 返回值是 Result
 	Result any
-
+	// 查询本身出的错误
 	Err error
 }
 

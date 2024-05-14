@@ -435,6 +435,74 @@ func TestSelector_Select(t *testing.T) {
 	}
 }
 
+func TestSelector_Alias(t *testing.T) {
+	db := memoryDB(t)
+	testCases := []struct {
+		name      string
+		s         QueryBuilder
+		wantQuery *Query
+		wantErr   error
+	}{
+		{
+			name: "empty column alias",
+			s:    NewSelector[TestModel](db).Select(C("Id").AS(""), C("Age")),
+			wantQuery: &Query{
+				SQL: "SELECT `id`,`age` FROM `test_model`;",
+			},
+		},
+		{
+			name: "empty Aggregate alias",
+			s:    NewSelector[TestModel](db).Select(C("Id").AS(""), Avg("Age").AS("")),
+			wantQuery: &Query{
+				SQL: "SELECT `id`,AVG(`age`) FROM `test_model`;",
+			},
+		},
+		{
+			// 指定列
+			name: "column alias",
+			s:    NewSelector[TestModel](db).Select(C("Id").AS("id3"), C("Age")),
+			wantQuery: &Query{
+				SQL: "SELECT `id` AS `id3`,`age` FROM `test_model`;",
+			},
+		},
+		{
+			name: "aggregate alias",
+			s:    NewSelector[TestModel](db).Select(C("Id"), Avg("Age").AS("avg_age")),
+			wantQuery: &Query{
+				SQL: "SELECT `id`,AVG(`age`) AS `avg_age` FROM `test_model`;",
+			},
+		},
+		{
+			name: "multi alias",
+			s:    NewSelector[TestModel](db).Select(C("Id").AS("id3"), Avg("Age").AS("avg_age")),
+			wantQuery: &Query{
+				SQL: "SELECT `id` AS `id3`,AVG(`age`) AS `avg_age` FROM `test_model`;",
+			},
+		},
+		{
+			name: "column alias with table alias",
+			s: func() QueryBuilder {
+				t1 := TableOf(&TestModel{}).As("t1")
+				return NewSelector[TestModel](db).Select(t1.C("Id").AS("id3"),
+					Avg("Age").AS("avg_age")).From(t1)
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT `t1`.`id` AS `id3`,AVG(`age`) AS `avg_age` FROM `test_model` AS `t1`;",
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			query, err := tc.s.Build()
+			assert.Equal(t, tc.wantErr, err)
+			if err != nil {
+				return
+			}
+			assert.Equal(t, tc.wantQuery, query)
+		})
+	}
+}
+
 func TestSelector_Having(t *testing.T) {
 	db := memoryDB(t)
 	testCases := []struct {

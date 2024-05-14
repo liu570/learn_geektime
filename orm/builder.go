@@ -197,6 +197,10 @@ func (b *builder) buildColumn(c Column) error {
 		b.sb.WriteByte('.')
 	}
 	b.quote(colName)
+	if c.alias != "" {
+		b.sb.WriteString(" AS ")
+		b.quote(c.alias)
+	}
 
 	return err
 }
@@ -284,6 +288,10 @@ func (b *builder) buildAggregate(agg Aggregate) error {
 	b.sb.WriteByte('(')
 	b.quote(fd.ColName)
 	b.sb.WriteByte(')')
+	if agg.alias != "" {
+		b.sb.WriteString(" AS ")
+		b.quote(agg.alias)
+	}
 	return nil
 }
 
