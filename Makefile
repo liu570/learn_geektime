@@ -47,3 +47,9 @@ remove($PORT):
 	lsof -i :8081
 	kill -9 <PID>
 
+# AST 模板编程生成代码
+gen-orm:
+	cd gen/orm-gen
+	go install .
+	orm-gen test_data/user.go
+

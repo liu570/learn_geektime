@@ -47,7 +47,7 @@ func TestSelector_Join(t *testing.T) {
 			},
 		},
 		{
-			name: "join",
+			name: "join-on",
 			q: func() QueryBuilder {
 				t1 := TableOf(&Order{}).As("t1")
 				t2 := TableOf(&OrderDetail{})
@@ -73,6 +73,23 @@ func TestSelector_Join(t *testing.T) {
 				SQL: "SELECT * FROM ((`order` AS `t1` JOIN `order_detail` AS `t2` ON `t1`.`id` = `t2`.`order_id`) JOIN `item` AS `t3` ON `t2`.`item_id` = `t3`.`id`);",
 			},
 		},
+		//{
+		//	name: "multiple join",
+		//	q: func() QueryBuilder {
+		//		t1 := TableOf(&Order{}).As("t1")
+		//		t2 := TableOf(&OrderDetail{}).As("t2")
+		//		t3 := t1.Join(t2).On(t1.C("Id").EQ(t2.C("OrderId")))
+		//		t4 := TableOf(&Item{}).As("t4")
+		//		t5 := t4.Join(t3).On()
+		//		return NewSelector[Order](db).
+		//			From(t1.Join(t2).
+		//				On(t1.C("Id").EQ(t2.C("OrderId"))).
+		//				Join(t3).On(t2.C("ItemId").EQ(t3.C("Id"))))
+		//	}(),
+		//	wantQuery: &Query{
+		//		SQL: "SELECT * FROM ((`order` AS `t1` JOIN `order_detail` AS `t2` ON `t1`.`id` = `t2`.`order_id`) JOIN `item` AS `t3` ON `t2`.`item_id` = `t3`.`id`);",
+		//	},
+		//},
 		{
 			name: "left multiple join",
 			q: func() QueryBuilder {

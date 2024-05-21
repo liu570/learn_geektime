@@ -1,0 +1,27 @@
+package {{.Package}}
+
+import (
+    "learn_geektime/orm"
+    {{- range  $idx,$import := .Imports}}
+    {{$import}}
+    {{- end}}
+)
+const (
+    {{- range .Types}}
+    {{- $name := .Name}}
+    {{- range $field :=.Fields}}
+    {{$name}}{{$field.Name}} = "{{$field.Name}}"
+    {{- end}}
+    {{- end}}
+)
+{{- $operators := .Operators}}
+{{- range .Types}}
+{{- $name := .Name}}
+{{- range $field :=.Fields}}
+{{- range $op := $operators}}
+func {{$name}}{{$field.Name}}{{$op}}(val {{$field.Type}}) orm.Predicate{
+    return orm.C("{{$field.Name}}").{{$op}}(val)
+}
+{{- end}}
+{{- end}}
+{{- end}}
