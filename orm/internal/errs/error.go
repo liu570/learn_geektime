@@ -44,6 +44,11 @@ func NewErrUnsupportedOrderAble(exp any) error {
 	return fmt.Errorf("orm: OrderAble 不支持的类型 %v", exp)
 }
 
+// NewErrUnsupportedOrderAble 返回一个不支持该 OrderAble 错误信息
+func NewErrUnsupportedTableReference(exp any) error {
+	return fmt.Errorf("orm: TableReference 不支持的类型 %v", exp)
+}
+
 // 后面可以考虑支持错误码
 // func NewErrUnsupportedExpressionType(exp any) error {
 // 	return fmt.Errorf("orm-50001: 不支持的表达式 %v", exp)

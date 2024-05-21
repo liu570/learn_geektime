@@ -145,97 +145,140 @@ func TestSelector_Join(t *testing.T) {
 	}
 }
 
-//func TestSelector_Subquery(t *testing.T) {
-//	db := memoryDB(t)
-//	type Order struct {
-//		Id        int
-//		UsingCol1 string
-//		UsingCol2 string
-//	}
-//
-//	type OrderDetail struct {
-//		OrderId int
-//		ItemId  int
-//	}
-//
-//	testCases := []struct {
-//		name      string
-//		q         QueryBuilder
-//		wantQuery *Query
-//		wantErr   error
-//	}{
-//		{
-//			name: "from",
-//			q: func() QueryBuilder {
-//				sub := NewSelector[OrderDetail](db).AsSubquery("sub")
-//				return NewSelector[Order](db).From(sub)
-//			}(),
-//			wantQuery: &Query{
-//				SQL: "SELECT * FROM (SELECT * FROM `order_detail`) AS `sub`;",
-//			},
-//		},
-//		//{
-//		//	name: "in",
-//		//	q: func() QueryBuilder {
-//		//		sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
-//		//		return NewSelector[Order](db).Where(C("Id").InQuery(sub))
-//		//	}(),
-//		//	wantQuery: &Query{
-//		//		SQL: "SELECT * FROM `order` WHERE `id` IN (SELECT `order_id` FROM `order_detail`);",
-//		//	},
-//		//},
-//		//{
-//		//	name: "exist",
-//		//	q: func() QueryBuilder {
-//		//		sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
-//		//		return NewSelector[Order](db).Where(Exist(sub))
-//		//	}(),
-//		//	wantQuery: &Query{
-//		//		SQL: "SELECT * FROM `order` WHERE  EXIST (SELECT `order_id` FROM `order_detail`);",
-//		//	},
-//		//},
-//		//{
-//		//	name: "not exist",
-//		//	q: func() QueryBuilder {
-//		//		sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
-//		//		return NewSelector[Order](db).Where(Not(Exist(sub)))
-//		//	}(),
-//		//	wantQuery: &Query{
-//		//		SQL: "SELECT * FROM `order` WHERE  NOT ( EXIST (SELECT `order_id` FROM `order_detail`));",
-//		//	},
-//		//},
-//		//{
-//		//	name: "all",
-//		//	q: func() QueryBuilder {
-//		//		sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
-//		//		return NewSelector[Order](db).Where(C("Id").GT(All(sub)))
-//		//	}(),
-//		//	wantQuery: &Query{
-//		//		SQL: "SELECT * FROM `order` WHERE `id` > ALL (SELECT `order_id` FROM `order_detail`);",
-//		//	},
-//		//},
-//		//{
-//		//	name: "some and any",
-//		//	q: func() QueryBuilder {
-//		//		sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
-//		//		return NewSelector[Order](db).Where(C("Id").GT(Some(sub)), C("Id").LT(Any(sub)))
-//		//	}(),
-//		//	wantQuery: &Query{
-//		//		SQL: "SELECT * FROM `order` WHERE (`id` > SOME (SELECT `order_id` FROM `order_detail`)) AND (`id` < ANY (SELECT `order_id` FROM `order_detail`;SELECT `order_id` FROM `order_detail`));",
-//		//	},
-//		//},
-//	}
-//	for _, tc := range testCases {
-//		t.Run(tc.name, func(t *testing.T) {
-//			query, err := tc.q.Build()
-//			assert.Equal(t, tc.wantErr, err)
-//			if err != nil {
-//				return
-//			}
-//			assert.Equal(t, tc.wantQuery, query)
-//		})
-//	}
-//}
+func TestSelector_Subquery(t *testing.T) {
+	db := memoryDB(t)
+	type Order struct {
+		Id        int
+		UsingCol1 string
+		UsingCol2 string
+	}
+
+	type OrderDetail struct {
+		OrderId int
+		ItemId  int
+		Price   int
+	}
+
+	testCases := []struct {
+		name      string
+		q         QueryBuilder
+		wantQuery *Query
+		wantErr   error
+	}{
+		{
+			name: "from",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).AsSubquery("sub")
+				return NewSelector[Order](db).From(sub)
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM (SELECT * FROM `order_detail`) AS `sub`;",
+			},
+		},
+		{
+			name: "where",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(Max("Price")).AsSubquery("sub")
+				return NewSelector[OrderDetail](db).Where(C("Price").EQ(sub))
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM `order_detail` WHERE `price` = (SELECT MAX(`price`) FROM `order_detail`);",
+			},
+		},
+		{
+			name: "multi table where",
+			q: func() QueryBuilder {
+				sub := NewSelector[Order](db).Select(C("Id")).Where(C("Id").GT(3)).Subquery()
+				return NewSelector[OrderDetail](db).Where(C("OrderId").EQ(sub))
+			}(),
+			wantQuery: &Query{
+				SQL:  "SELECT * FROM `order_detail` WHERE `order_id` = (SELECT `id` FROM `order` WHERE `id` > ?);",
+				Args: []any{3},
+			},
+		},
+		{
+			name: "origin in",
+			q: func() QueryBuilder {
+				return NewSelector[Order](db).Where(C("Id").In(1, 2, 3))
+			}(),
+			wantQuery: &Query{
+				SQL:  "SELECT * FROM `order` WHERE `id` IN (?,?,?);",
+				Args: []any{1, 2, 3},
+			},
+		},
+		{
+			name: "Subquery in",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(C("OrderId")).Subquery()
+				return NewSelector[Order](db).Where(C("Id").In(sub))
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM `order` WHERE `id` IN (SELECT `order_id` FROM `order_detail`);",
+			},
+		},
+		{
+			name: "origin in and Subquery not in",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
+				return NewSelector[Order](db).Where(C("Id").NotIn(sub).And(C("Id").In(1, 2, 3)))
+			}(),
+			wantQuery: &Query{
+				SQL:  "SELECT * FROM `order` WHERE (`id` NOT IN (SELECT `order_id` FROM `order_detail`)) AND (`id` IN (?,?,?));",
+				Args: []any{1, 2, 3},
+			},
+		},
+		{
+			name: "exist",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
+				return NewSelector[Order](db).Where(Exist(sub))
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM `order` WHERE  EXIST (SELECT `order_id` FROM `order_detail`);",
+			},
+		},
+		{
+			name: "not exist",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
+				return NewSelector[Order](db).Where(Not(Exist(sub)))
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM `order` WHERE  NOT ( EXIST (SELECT `order_id` FROM `order_detail`));",
+			},
+		},
+		{
+			name: "all",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
+				return NewSelector[Order](db).Where(C("Id").GT(All(sub)))
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM `order` WHERE `id` > ALL (SELECT `order_id` FROM `order_detail`);",
+			},
+		},
+		{
+			name: "some and any",
+			q: func() QueryBuilder {
+				sub := NewSelector[OrderDetail](db).Select(C("OrderId")).AsSubquery("sub")
+				return NewSelector[Order](db).Where(C("Id").GT(Some(sub)), C("Id").LT(Any(sub)))
+			}(),
+			wantQuery: &Query{
+				SQL: "SELECT * FROM `order` WHERE (`id` > SOME (SELECT `order_id` FROM `order_detail`)) AND (`id` < ANY (SELECT `order_id` FROM `order_detail`));",
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			query, err := tc.q.Build()
+			assert.Equal(t, tc.wantErr, err)
+			if err != nil {
+				return
+			}
+			assert.Equal(t, tc.wantQuery, query)
+		})
+	}
+}
 
 func TestSelector_Get(t *testing.T) {
 	mockDB, mock, err := sqlmock.New()

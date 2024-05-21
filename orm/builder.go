@@ -83,8 +83,16 @@ func (b *builder) buildExpression(expression Expression) error {
 		return b.buildPredicate(expr)
 	case Aggregate:
 		return b.buildAggregate(expr)
+	case SubQueryExpr:
+		b.sb.WriteString(expr.pred + " ")
+		return b.buildSubQuery(expr.s)
+	case SubQuery:
+		return b.buildSubQuery(expr)
+	case IN:
+		return b.buildInValues(expr)
 	case RawExpr:
 		return b.buildRawExpr(expr)
+
 	case nil:
 		return nil
 	default:
@@ -148,6 +156,17 @@ func (b *builder) buildTableReference(t TableReference) error {
 		}
 
 		b.sb.WriteByte(')')
+	case SubQuery:
+		err := b.buildSubQuery(tbl)
+		if err != nil {
+			return err
+		}
+		if len(tbl.alias) > 0 {
+			b.sb.WriteString(" AS ")
+			b.quote(tbl.alias)
+		}
+	default:
+		return errs.NewErrUnsupportedTableReference(tbl)
 	}
 	return nil
 }
@@ -309,6 +328,35 @@ func (b *builder) buildOrderBy(order OrderBy) error {
 	b.quote(fd.ColName)
 	b.sb.WriteByte(' ')
 	b.sb.WriteString(order.order)
+	return nil
+}
+
+func (b *builder) buildSubQuery(s SubQuery) error {
+	query, err := s.q.Build()
+	if err != nil {
+		return err
+	}
+	b.sb.WriteByte('(')
+	b.sb.WriteString(query.SQL[:len(query.SQL)-1])
+	b.addArgs(query.Args...)
+	b.sb.WriteByte(')')
+	return nil
+}
+func (b *builder) buildInValues(s IN) error {
+	if len(s.values) == 1 {
+		if subQuery, ok := s.values[0].(SubQuery); ok {
+			return b.buildSubQuery(subQuery)
+		}
+	}
+	b.sb.WriteByte('(')
+	for i := 0; i < len(s.values); i++ {
+		if i > 0 {
+			b.sb.WriteByte(',')
+		}
+		b.sb.WriteByte('?')
+	}
+	b.addArgs(s.values...)
+	b.sb.WriteByte(')')
 	return nil
 }
 

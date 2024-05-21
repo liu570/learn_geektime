@@ -30,3 +30,30 @@ func (r RawExpr) AsPredicate() Predicate {
 		left: r,
 	}
 }
+
+type SubQueryExpr struct {
+	s SubQuery
+	// 谓词 ALL ANY SOME
+	pred string
+}
+
+func (s SubQueryExpr) expr() {}
+
+func Any(query SubQuery) SubQueryExpr {
+	return SubQueryExpr{
+		s:    query,
+		pred: "ANY",
+	}
+}
+func All(query SubQuery) SubQueryExpr {
+	return SubQueryExpr{
+		s:    query,
+		pred: "ALL",
+	}
+}
+func Some(query SubQuery) SubQueryExpr {
+	return SubQueryExpr{
+		s:    query,
+		pred: "SOME",
+	}
+}

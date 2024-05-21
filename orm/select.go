@@ -96,6 +96,16 @@ func (s *Selector[T]) Offset(num int) *Selector[T] {
 	s.offset = num
 	return s
 }
+func (s *Selector[T]) AsSubquery(alias string) SubQuery {
+	return SubQuery{
+		q:     s,
+		alias: alias,
+	}
+}
+
+func (s *Selector[T]) Subquery() SubQuery {
+	return s.AsSubquery("")
+}
 
 func (s *Selector[T]) Get(ctx context.Context) (*T, error) {
 	model, err := s.r.Get(new(T))
@@ -133,6 +143,9 @@ func (s *Selector[T]) GetMulti(ctx context.Context) ([]*T, error) {
 }
 
 func (s *Selector[T]) Build() (*Query, error) {
+	// TODO : build 函数 如何优化 这里其它 QueryBuilder 没有添加重置代码
+	s.sb.Reset()
+	s.args = nil
 	t := new(T)
 	var err error
 	s.model, err = s.core.r.Get(t)

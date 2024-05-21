@@ -74,3 +74,25 @@ func (c Column) Sub(val any) Predicate {
 		right: valueOf(val),
 	}
 }
+
+func (c Column) In(val ...any) Predicate {
+	return Predicate{
+		left:  c,
+		op:    opIN,
+		right: valueOf(val),
+	}
+}
+func (c Column) NotIn(val ...any) Predicate {
+	return Predicate{
+		left:  c,
+		op:    opNOTIN,
+		right: valueOf(val),
+	}
+}
+
+type IN struct {
+	values []any
+}
+
+func (I IN) expr() {
+}

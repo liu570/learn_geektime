@@ -14,6 +14,9 @@ const (
 	opADD   = "+"
 	opSUB   = "-"
 	opMulti = "*"
+	opIN    = "IN"
+	opNOTIN = "NOT IN"
+	opEXIST = "EXIST"
 )
 
 func (o op) String() string {
@@ -44,6 +47,13 @@ func Not(p Predicate) Predicate {
 	return Predicate{
 		op:    opNOT,
 		right: p,
+	}
+}
+
+func Exist(val ...any) Predicate {
+	return Predicate{
+		op:    opEXIST,
+		right: valueOf(val),
 	}
 }
 
@@ -88,6 +98,10 @@ func valueOf(val any) Expression {
 	switch v := val.(type) {
 	case Expression:
 		return v
+	case []any:
+		return IN{
+			values: v,
+		}
 	default:
 		return NewValue(val)
 	}

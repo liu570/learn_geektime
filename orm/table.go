@@ -131,4 +131,12 @@ func (jb *JoinBuilder) Using(cols ...string) Join {
 
 // SubQuery 子查询
 type SubQuery struct {
+	q     QueryBuilder
+	alias string
+}
+
+func (s SubQuery) expr() {}
+
+func (s SubQuery) tableAlias() string {
+	return s.alias
 }
