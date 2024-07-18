@@ -41,7 +41,7 @@ func (s *Server) Start() error {
 // 我们可以任务 一个请求包含两个部分
 // 1. 长度字段：8字节
 // 2. 请求数据
-func (s Server) handleConn(conn net.Conn) error {
+func (s *Server) handleConn(conn net.Conn) error {
 	for {
 		// lenBs 长度字段的字节表示
 		lenBs := make([]byte, numOfLengthBytes)

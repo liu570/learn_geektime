@@ -52,6 +52,7 @@ func NewPool(initCnt int, maxCnt int, idleCnt int, maxIdleTime time.Duration, fa
 		maxCnt:      maxCnt,
 		cnt:         0,
 		maxIdleTime: maxIdleTime,
+		factory:     factory,
 	}, nil
 }
 

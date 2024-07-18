@@ -1,6 +1,8 @@
 package cache
 
-import "time"
+import (
+	"time"
+)
 
 type RetryStrategy interface {
 	// Next 返回下一次重试的间隔 如果下一次不需要的第二参数返回 false

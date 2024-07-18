@@ -24,6 +24,7 @@ func TestBalancer_e2e_Pick(t *testing.T) {
 	}()
 	time.Sleep(time.Second * 2)
 	balancer.Register(base.NewBalancerBuilder("round_robin", &Builder{}, base.Config{HealthCheck: true}))
+
 	cc, err := grpc.Dial("localhost:8081", grpc.WithInsecure(),
 		grpc.WithDefaultServiceConfig(`{"LoadBalancingPolicy":"round_robin"}`))
 	require.NoError(t, err)
