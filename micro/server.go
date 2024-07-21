@@ -18,6 +18,7 @@ type Server struct {
 	*grpc.Server
 
 	weight int
+	group  string
 }
 
 func NewServer(name string, opts ...ServerOption) (*Server, error) {
@@ -47,6 +48,7 @@ func (s *Server) Start(addr string) error {
 			// 这里 ip 端口地址 如果是在容器中使用，容器的 ip 地址需要映射不可直接这样使用
 			Address: listener.Addr().String(),
 			Weight:  uint32(s.weight),
+			Group:   s.group,
 		})
 		if err != nil {
 			return err
@@ -88,5 +90,12 @@ func ServerWithRegisterTimeout(timeout time.Duration) ServerOption {
 func ServerWithWeight(weight int) ServerOption {
 	return func(server *Server) {
 		server.weight = weight
+	}
+}
+
+// ServerWithGroup 用于配置实例中的分组
+func ServerWithGroup(group string) ServerOption {
+	return func(server *Server) {
+		server.group = group
 	}
 }
