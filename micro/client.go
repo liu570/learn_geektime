@@ -47,7 +47,7 @@ func ClientWithPickerBuilder(name string, pikcerBuilder base.PickerBuilder) Clie
 		c.balancer = balanceBuilder
 	}
 }
-func (c *Client) Dial(ctx context.Context, service string) (*grpc.ClientConn, error) {
+func (c *Client) Dial(ctx context.Context, service string, dialOpts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 	if c.balancer != nil {
 		opts = append(opts, grpc.WithDefaultServiceConfig(
@@ -62,6 +62,9 @@ func (c *Client) Dial(ctx context.Context, service string) (*grpc.ClientConn, er
 	}
 	if c.insecure {
 		opts = append(opts, grpc.WithInsecure())
+	}
+	if dialOpts != nil {
+		opts = append(opts, dialOpts...)
 	}
 	cc, err := grpc.DialContext(ctx, fmt.Sprintf("registry:///%s", service), opts...)
 	//cc, err := grpc.DialContext(ctx, "localhost:8081", opts...)
